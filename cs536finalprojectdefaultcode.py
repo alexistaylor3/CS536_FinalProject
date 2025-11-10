@@ -28,7 +28,7 @@ beta_1 = 0.0
 betas = [0.8, 0.9, 0.95, 0.99]
 batchsize = 8
 batchSizes = [8, 16, 32]
-epochs = 2
+epochs = 100
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Main code
@@ -122,15 +122,14 @@ def train(net, noe, filepath_trainloss, filepath_testacc, filepath_trainacc, ini
         if epoch % 1 == 0:
             for p in optimizer.param_groups:
                 p['lr'] = initial_lr/np.sqrt(1+epoch)
-    #alex change 1
-    # training_loss_vec.append(running_loss/check_interval)
-    # train_acc = train_accuracy(net)
-    # train_acc_vec.append(train_acc)
-    # test_acc = test_accuracy(net)
-    # test_acc_vec.append(test_acc)
-    # print(running_loss / check_interval, file=doc)
-    # print(test_acc, file=doc2)
-    # print(train_acc, file=doc3)
+    training_loss_vec.append(running_loss/check_interval)
+    train_acc = train_accuracy(net)
+    train_acc_vec.append(train_acc)
+    test_acc = test_accuracy(net)
+    test_acc_vec.append(test_acc)
+    print(running_loss / check_interval, file=doc)
+    print(test_acc, file=doc2)
+    print(train_acc, file=doc3)
     doc.close()
     doc2.close()
 
@@ -189,35 +188,27 @@ transform = transforms.Compose(
 
 trainset = torchvision.datasets.CIFAR10(root='./data', train=True,
                                         download=True, transform=transform)
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=batchsize,
-                                          shuffle=True, num_workers=8,  pin_memory=True)
-
 testset = torchvision.datasets.CIFAR10(root='./data', train=False,
                                        download=True, transform=transform)
-testloader = torch.utils.data.DataLoader(testset, batch_size=batchsize,
-                                         shuffle=False, num_workers=8,  pin_memory=True)
 # resnet
 net = torch.hub.load('pytorch/vision:v0.6.0', 'resnet18', pretrained=False)
-net.eval()
-
-# # cifar_resnet.py
 net = net.to(device)
+net.eval()
+# # cifar_resnet.py
 criterion = nn.CrossEntropyLoss()
 PATH = './cifar_net_Adam.pth'
 for beta in betas:
     beta_2 = beta
     for batchSize in batchSizes:
         batchsize = batchSize
-        #alex change 2
-        # net = torch.hub.load('pytorch/vision:v0.6.0', 'resnet18', pretrained=False)
-        # net = net.to(device)
+        net = torch.hub.load('pytorch/vision:v0.6.0', 'resnet18', pretrained=False)
         optimizer = optim.Adam(net.parameters(), lr=0.001, betas=(beta_1, beta), eps=1e-08, weight_decay=0, amsgrad=False)
-        #alex change 3
-        # trainloader = torch.utils.data.DataLoader(trainset, batch_size=batchsize,
-        #                                   shuffle=True, num_workers=8,  pin_memory=True)
 
-        # testloader = torch.utils.data.DataLoader(testset, batch_size=batchsize,
-        #                                  shuffle=False, num_workers=8,  pin_memory=True)
+        trainloader = torch.utils.data.DataLoader(trainset, batch_size=batchsize,
+                                          shuffle=True, num_workers=8,  pin_memory=True)
+
+        testloader = torch.utils.data.DataLoader(testset, batch_size=batchsize,
+                                         shuffle=False, num_workers=8,  pin_memory=True)
         train(net, epochs, "Exp1-training-loss-beta1="+str(beta_1)+";beta2="+str(beta)+";bs="+str(batchSize), "Exp1-test-accuracy-beta1="+str(beta_1)+";beta2="+str(beta_2)+";bs="+str(batchsize), "Exp1-train-accuracy-beta1="+str(beta_1)+";beta2="+str(beta_2)+";bs="+str(batchsize), 0.001, batchsize, device)
         torch.save(net.state_dict(), PATH)
 print('Finished Training')
