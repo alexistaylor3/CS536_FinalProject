@@ -1,2 +1,3 @@
 # Ignore Python virtual environment
 gpu_env/*
+*/data/*
