@@ -1,3 +1,4 @@
 # Ignore Python virtual environment
 gpu_env/
 **/data/
+**/cifar_net.pth
