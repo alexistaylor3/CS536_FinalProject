@@ -2,3 +2,5 @@
 gpu_env/
 **/data/
 **/cifar_net.pth
+**.png
+**/**.txt
