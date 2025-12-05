@@ -19,4 +19,4 @@
   ## Contributions
   * Ran the code on your desktop computer to get our training and test accuracy results
   * Made bug fixes to the code due to the fact they were running the code
-  * Organizized/Created GitHub repo
+  * Organized/Created GitHub repo
